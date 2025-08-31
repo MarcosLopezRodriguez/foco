@@ -785,7 +785,7 @@ export default function App() {
   const total = tasks.length;
   const completed = tasks.filter((t) => t.estado === "hecha").length;
   const completion = total ? completed / total : 0;
-  const remaining = total ? Math.round(100 - completion * 100) : 0;
+  const remaining = total ? Math.round((1 - completion) * 100) : 0;
 
   const [ready, setReady] = useState(false);
   useEffect(() => {
