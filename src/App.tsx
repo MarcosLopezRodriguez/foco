@@ -301,11 +301,10 @@ function NavBtn({ children, icon, onClick, active }: any) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full transition border ${
-        active
+      className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full transition border ${active
           ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white"
           : "bg-white/70 dark:bg-neutral-900/70 text-neutral-700 dark:text-neutral-200 border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-      }`}
+        }`}
     >
       {icon}
       {children}
@@ -503,11 +502,10 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-sm border transition ${
-        active
+      className={`px-3 py-1.5 rounded-full text-sm border transition ${active
           ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 border-neutral-900 dark:border-white"
           : "bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-      }`}
+        }`}
     >
       {label}
     </button>
@@ -754,6 +752,8 @@ function CalendarView() {
   const [month, setMonth] = useState(startOfMonth(new Date()));
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const wheelAccumRef = useRef(0);
+  const wheelLockRef = useRef(0);
   const done = tasks.filter((t) => t.estado === "hecha" && (t.completedAt || t.createdAt));
   const monthStart = startOfWeek(startOfMonth(month), { weekStartsOn: 1 });
   const monthEnd = endOfWeek(endOfMonth(month), { weekStartsOn: 1 });
@@ -777,8 +777,24 @@ function CalendarView() {
 
   const today = new Date();
 
+  const onWheelCalendar = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (isOpen) return; // do not navigate if modal is open
+    const now = Date.now();
+    wheelAccumRef.current += e.deltaY;
+    if (now - wheelLockRef.current < 200) return; // small throttle
+    if (Math.abs(wheelAccumRef.current) > 40) {
+      if (wheelAccumRef.current > 0) {
+        setMonth((m) => addMonths(m, 1)); // wheel down: next month
+      } else {
+        setMonth((m) => subMonths(m, 1)); // wheel up: previous month
+      }
+      wheelLockRef.current = now;
+      wheelAccumRef.current = 0;
+    }
+  };
+
   return (
-    <div>
+    <div onWheel={onWheelCalendar}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <button
@@ -835,9 +851,8 @@ function CalendarView() {
                 setIsOpen(true);
               }}
               key={day.toISOString()}
-              className={`relative text-left min-h-[86px] p-1 rounded-xl border transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400/50 ${
-                intensityClass(count)
-              } ${isCurrentMonth ? "" : "opacity-50"}`}
+              className={`relative text-left min-h-[86px] p-1 rounded-xl border transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400/50 ${intensityClass(count)
+                } ${isCurrentMonth ? "" : "opacity-50"}`}
             >
               <div className="flex items-start justify-between">
                 <div className={`text-[10px] ${count > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-neutral-500"}`}>
@@ -867,7 +882,7 @@ function CalendarView() {
                     </li>
                   ))}
                   {count > 2 && (
-                    <li className="text-[10px] text-neutral-500">+ {count - 2} mas</li>
+                    <li className="text-[10px] text-neutral-500">+ {count - 2} más</li>
                   )}
                 </ul>
               )}
@@ -916,7 +931,7 @@ function CalendarView() {
               </div>
               <div className="p-4 max-h-[60vh] overflow-auto">
                 {getDayTasks(selectedDay).length === 0 ? (
-                  <div className="text-sm text-neutral-500">No hay tareas completadas este dia.</div>
+                  <div className="text-sm text-neutral-500">No hay tareas completadas este día.</div>
                 ) : (
                   <ul className="space-y-2">
                     {getDayTasks(selectedDay).map((t) => (
@@ -1047,12 +1062,14 @@ export default function App() {
           view === "triage"
             ? "Triage"
             : view === "focus"
-            ? "Foco"
-            : view === "stats"
-            ? "Estadísticas"
-            : view === "calendar"
-            ? "Calendario"
-            : "Ajustes"
+              ? "Foco"
+              : view === "stats"
+                ? "Estadísticas"
+                : view === "calendar"
+                  ? "Calendario"
+                  : view === "settings"
+                    ? "Ajustes"
+                    : "Vista desconocida"
         }
       >
         {!ready ? (
@@ -1065,8 +1082,10 @@ export default function App() {
           <StatsView />
         ) : view === "calendar" ? (
           <CalendarView />
-        ) : (
+        ) : view === "settings" ? (
           <SettingsView />
+        ) : (
+          <div className="py-12 text-center text-neutral-500">Vista desconocida</div>
         )}
       </Section>
 
