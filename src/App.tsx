@@ -781,6 +781,11 @@ function SettingsView() {
 export default function App() {
   const [view, setView] = useState<View>("focus");
   const hydrate = useAppStore((s) => s.hydrateState);
+  const tasks = useAppStore((s) => s.tasks.filter((t) => t.estado !== "archivada"));
+  const total = tasks.length;
+  const completed = tasks.filter((t) => t.estado === "hecha").length;
+  const completion = total ? completed / total : 0;
+  const remaining = total ? Math.round(100 - completion * 100) : 0;
 
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -790,6 +795,18 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
       <TopNav view={view} setView={setView} />
+
+      <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="h-2 bg-neutral-300 dark:bg-neutral-800 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-green-500 dark:bg-green-400 transition-all"
+            style={{ width: `${completion * 100}%` }}
+          />
+        </div>
+        <p className="mt-1 text-right text-xs text-neutral-500 dark:text-neutral-400">
+          {remaining}% restante
+        </p>
+      </div>
 
       <Section title={view === "triage" ? "Triage" : view === "focus" ? "Foco" : view === "stats" ? "Estadísticas" : "Ajustes"}>
         {!ready ? (
