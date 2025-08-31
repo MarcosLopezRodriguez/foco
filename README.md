@@ -31,4 +31,8 @@ Abre http://localhost:5173
 - Gestos en Foco: **swipe derecha** (completar), **swipe izquierda** (posponer 1h).
 - Triage con filtros (Hoy / Backlog / Todas) y arrastre para reordenar.
 
+## Créditos y Apoyo al desarrollo
+
+Si esta aplicación te ha ayudado, considera apoyar al desarrollo de esta y otras aplicaciones: https://ko-fi.com/markonichan
+
 ¡Disfruta! ✨
