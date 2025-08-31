@@ -797,13 +797,19 @@ export default function App() {
       <TopNav view={view} setView={setView} />
 
       <div className="max-w-5xl mx-auto px-4 py-4">
-        <div className="h-2 bg-neutral-300 dark:bg-neutral-800 rounded-full overflow-hidden">
+        <div
+          className="h-3 md:h-4 bg-neutral-200 dark:bg-neutral-800/80 rounded-full overflow-hidden ring-1 ring-neutral-300/60 dark:ring-neutral-700/50"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(completion * 100)}
+        >
           <div
-            className="h-full bg-green-500 dark:bg-green-400 transition-all"
+            className="h-full transition-all duration-500 ease-out bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 dark:from-green-400 dark:via-emerald-400 dark:to-teal-400 shadow-inner"
             style={{ width: `${completion * 100}%` }}
           />
         </div>
-        <p className="mt-1 text-right text-xs text-neutral-500 dark:text-neutral-400">
+        <p className="mt-2 text-right text-sm md:text-base font-semibold text-neutral-600 dark:text-neutral-300">
           {remaining}% restante
         </p>
       </div>
