@@ -300,7 +300,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function Badge({ children, tone = "gray" as "gray" | "red" | "green" | "blue" }) {
+function Badge({ children, tone = "gray" as "gray" | "red" | "green" | "blue" }: { children: React.ReactNode, tone?: "gray" | "red" | "green" | "blue" }) {
   const palette: any = {
     gray: "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300",
     red: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
