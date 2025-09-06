@@ -272,10 +272,11 @@ const useAppStore = create<AppState>((set, get) => ({
 
 function TopNav({ view, setView }: { view: View; setView: (v: View) => void }) {
   return (
-    <div className="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-neutral-900/70 border-b border-neutral-200 dark:border-neutral-800">
+    <div className="hidden sm:block sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-neutral-900/70 border-b border-neutral-200 dark:border-neutral-800">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-2">
         <span className="font-bold text-lg tracking-tight">Foco</span>
-        <div className="ml-auto flex items-center gap-1 text-sm">
+        {/* On small screens allow wrapping and compact size */}
+        <div className="ml-auto flex flex-wrap items-center gap-1 text-xs sm:text-sm">
           <NavBtn icon={<Target size={16} />} active={view === "focus"} onClick={() => setView("focus")}>
             Foco
           </NavBtn>
@@ -297,6 +298,39 @@ function TopNav({ view, setView }: { view: View; setView: (v: View) => void }) {
   );
 }
 
+// Bottom navigation for mobile only
+function BottomNav({ view, setView }: { view: View; setView: (v: View) => void }) {
+  const Item = ({ icon, label, v }: { icon: React.ReactNode; label: string; v: View }) => (
+    <button
+      onClick={() => setView(v)}
+      aria-label={label}
+      aria-current={view === v ? "page" : undefined}
+      className={`flex flex-col items-center justify-center flex-1 py-2 rounded-xl transition ${
+        view === v
+          ? "text-neutral-900 dark:text-white"
+          : "text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+      }`}
+    >
+      {icon}
+      <span className="text-[10px] mt-0.5">{label}</span>
+    </button>
+  );
+
+  return (
+    <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 bg-white/80 dark:bg-neutral-900/80 backdrop-blur border-t border-neutral-200 dark:border-neutral-800 pb-[env(safe-area-inset-bottom)]">
+      <div className="max-w-5xl mx-auto px-3">
+        <nav className="grid grid-cols-5 gap-2 py-1">
+          <Item icon={<Target size={18} />} label="Foco" v="focus" />
+          <Item icon={<ListIcon size={18} />} label="Triage" v="triage" />
+          <Item icon={<Clock size={18} />} label="Stats" v="stats" />
+          <Item icon={<CalendarDays size={18} />} label="Cal" v="calendar" />
+          <Item icon={<SettingsIcon size={18} />} label="Ajustes" v="settings" />
+        </nav>
+      </div>
+    </div>
+  );
+}
+
 function NavBtn({ children, icon, onClick, active }: any) {
   return (
     <button
@@ -307,7 +341,8 @@ function NavBtn({ children, icon, onClick, active }: any) {
         }`}
     >
       {icon}
-      {children}
+      {/* Hide text on very small screens to save space */}
+      <span className="hidden sm:inline">{children}</span>
     </button>
   );
 }
@@ -365,15 +400,16 @@ function TaskComposer() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex gap-2 items-center">
+    // Allow wrapping on small screens so the composer doesn't overflow
+    <form onSubmit={onSubmit} className="flex flex-wrap md:flex-nowrap gap-2 items-center">
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Añadir tarea…"
-        className="flex-1 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600"
+        className="flex-1 min-w-0 bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-neutral-300 dark:focus:ring-neutral-600"
       />
       <select
-        className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-2 py-2"
+        className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl px-2 py-2 min-w-[96px]"
         value={priority}
         onChange={(e) => setPriority(e.target.value as Priority)}
         title="Prioridad"
@@ -438,9 +474,10 @@ function TriageView() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
+      {/* Allow controls to wrap under the composer on small screens */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <TaskComposer />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:justify-start">
           <FilterChip label="Hoy" active={filter === "hoy"} onClick={() => setFilter("hoy")} />
           <FilterChip label="Backlog" active={filter === "backlog"} onClick={() => setFilter("backlog")} />
           <FilterChip label="Todas" active={filter === "todas"} onClick={() => setFilter("todas")} />
@@ -663,7 +700,8 @@ function SwipeCard({ task, onComplete, onSnooze, onSkip, onNext }: { task: Task;
         </div>
       ) : null}
 
-      <div className="mt-6 flex items-center gap-2">
+      {/* Wrap action buttons on small screens to avoid overflow */}
+      <div className="mt-6 flex flex-wrap items-center gap-2">
         <button
           onClick={() => {
             onComplete();
@@ -701,7 +739,8 @@ function Pomodoro({ seconds, running, setRunning }: { seconds: number; running: 
   const mm = Math.floor(seconds / 60).toString().padStart(2, "0");
   const ss = (seconds % 60).toString().padStart(2, "0");
   return (
-    <div className="ml-auto flex items-center gap-2 text-sm">
+    // On small screens, take full width and align nicely; on larger keep to the right
+    <div className="w-full sm:w-auto sm:ml-auto flex items-center gap-2 text-sm justify-between sm:justify-start">
       <span className="px-3 py-2 rounded-xl bg-neutral-100 dark:bg-neutral-800">{mm}:{ss}</span>
       <button
         onClick={() => setRunning(!running)}
@@ -823,7 +862,7 @@ function CalendarView() {
         </button>
       </div>
 
-      <div className="mb-2 flex items-center gap-3 text-xs text-neutral-500">
+      <div className="mb-2 flex items-center gap-3 text-[11px] sm:text-xs text-neutral-500">
         <div className="inline-flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded bg-emerald-300/80" /> Con tareas
         </div>
@@ -832,13 +871,16 @@ function CalendarView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2 text-xs">
-        {weekDays.map((d) => (
-          <div key={d.toISOString()} className="text-center font-semibold text-neutral-500">
-            {format(d, "EEE", { locale: es })}
-          </div>
-        ))}
-        {days.map((day) => {
+      {/* Horizontal scroll container for very small screens */}
+      <div className="overflow-x-auto">
+        <div className="min-w-[360px]">
+          <div className="grid grid-cols-7 gap-2 text-[11px] sm:text-xs">
+            {weekDays.map((d) => (
+              <div key={d.toISOString()} className="text-center font-semibold text-neutral-500">
+                {format(d, "EEE", { locale: es })}
+              </div>
+            ))}
+            {days.map((day) => {
           const dayTasks = getDayTasks(day);
           const count = dayTasks.length;
           const isCurrentMonth = day.getMonth() === month.getMonth();
@@ -851,7 +893,7 @@ function CalendarView() {
                 setIsOpen(true);
               }}
               key={day.toISOString()}
-              className={`relative text-left min-h-[86px] p-1 rounded-xl border transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400/50 ${intensityClass(count)
+              className={`relative text-left min-h-[72px] sm:min-h-[86px] p-1 sm:p-2 rounded-xl border transition shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400/50 ${intensityClass(count)
                 } ${isCurrentMonth ? "" : "opacity-50"}`}
             >
               <div className="flex items-start justify-between">
@@ -888,7 +930,9 @@ function CalendarView() {
               )}
             </button>
           );
-        })}
+            })}
+          </div>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -1036,7 +1080,7 @@ export default function App() {
   }, [hydrate]);
 
   return (
-    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
+    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 pb-20 sm:pb-0">
       <TopNav view={view} setView={setView} />
 
       <div className="max-w-5xl mx-auto px-4 py-4">
@@ -1092,6 +1136,7 @@ export default function App() {
       <footer className="max-w-5xl mx-auto px-4 pb-8 text-xs text-neutral-500">
         <p className="mt-4">Consejo: arrastra la tarjeta hacia la derecha para completar; hacia la izquierda para posponer 1h.</p>
       </footer>
+      <BottomNav view={view} setView={setView} />
     </div>
   );
 }
